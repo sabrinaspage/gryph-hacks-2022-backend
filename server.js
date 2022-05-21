@@ -1,6 +1,3 @@
-//const Pool = require("pg").Pool;
-//const { Client } = require("pg");
-//var fs = require("fs");
 require("dotenv").config();
 
 const express = require("express");
@@ -14,7 +11,11 @@ app.use(bodyParse.urlencoded({ extended: false }));
 app.use(bodyParse.json());
 app.use(morgan("dev"));
 
+//START  RUNNING MANUAL SQL
 /*
+const Pool = require("pg").Pool;
+var fs = require("fs");
+
 var queries = fs
   .readFileSync("./database/schema.sql")
   .toString()
@@ -36,6 +37,7 @@ const pool = new Pool({
   });
 })();
 */
+//END RUNNING MANUAL SQL
 
 //Prevent CORS And Allow PUT,POST,DELETE,PATCH,GET
 app.use((req, res, next) => {

@@ -18,19 +18,68 @@ router.get("/", (req, res) => {
 });
 
 router.get("/:id", (req, res) => {
-  const id = parseInt(req.params.id);
-
-  pool.query("SELECT * FROM users WHERE id = $1", [id], (error, results) => {
-    if (error) {
-      throw error;
+  pool.query(
+    "SELECT * FROM users WHERE id = $1",
+    [req.params.id],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      console.log(results);
+      res.status(200).send(results.rows);
     }
-    res.status(200).json(results.rows);
-  });
+  );
+});
+
+router.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  pool.query(
+    "SELECT * FROM users WHERE email = $1 AND password = $2",
+    [email, password],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      if (results.rows && results.rows.length > 0) {
+        res.status(200).send(results.rows);
+      } else {
+        res.status(404).send({ error: "Invalid email or password" });
+      }
+    }
+  );
 });
 
 router.post("/", (req, res) => {
   const { name, email, password, type } = req.body;
 
+  pool.query(
+    "SELECT * FROM users WHERE email = $1",
+    [email],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+
+      if (results.rows && results.rows.length > 0) {
+        res.status(404).send({
+          error: "Email already exists",
+        });
+      } else {
+        pool.query(
+          "INSERT INTO users (name, email, password, type) VALUES ($1, $2, $3, $4)",
+          [name, email, password, type],
+          (error, results) => {
+            if (error) {
+              throw error;
+            }
+            res.status(201).send(results);
+          }
+        );
+      }
+    }
+  );
+
+  /*
   pool.query(
     "INSERT INTO users (name, email, password, type) VALUES ($1, $2, $3, $4)",
     [name, email, password, type],
@@ -38,9 +87,10 @@ router.post("/", (req, res) => {
       if (error) {
         throw error;
       }
-      res.status(201).send(`User added with ID: ${results.insertId}`);
+      res.status(201).send(results);
     }
   );
+  */
 });
 
 router.get("/delete/:id", (req, res) => {
