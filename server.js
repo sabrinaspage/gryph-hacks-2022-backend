@@ -1,5 +1,5 @@
 require("dotenv").config();
-
+const cors = require("cors");
 const express = require("express");
 const morgan = require("morgan");
 const app = express();
@@ -7,6 +7,7 @@ const bodyParse = require("body-parser");
 const users = require("./routers/users");
 
 //MiddleWare
+app.use(cors());
 app.use(bodyParse.urlencoded({ extended: false }));
 app.use(bodyParse.json());
 app.use(morgan("dev"));
@@ -38,20 +39,6 @@ const pool = new Pool({
 })();
 */
 //END RUNNING MANUAL SQL
-
-//Prevent CORS And Allow PUT,POST,DELETE,PATCH,GET
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*"),
-    res.header(
-      "Access-Control-Allow-Headers",
-      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-    );
-  if (req.method === "OPTIONS") {
-    res.header("Access-Control-Allow-Methods", "PUT, POST, DELETE, PATCH, GET");
-    return res.status(200).json({});
-  }
-  next();
-});
 
 app.use("/users", users);
 
