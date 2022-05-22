@@ -142,23 +142,25 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
 
         const transcriptResult = await transcribeAudioAPI(trimAudio);
 
-        console.log(
-          `Transcription: ${transcriptResult.alternatives[0].transcript}`
-        );
+        if (transcriptResult.alternatives) {
+          console.log(
+            `Transcription: ${transcriptResult.alternatives[0].transcript}`
+          );
 
-        const videoResults = await pool.query(
-          "INSERT INTO videos (session_id, name, transcript, video_order, start_time, end_time) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
-          [
-            sessionId,
-            trimVideo,
-            transcriptResult.alternatives[0].transcript,
-            index + 1,
-            timeStamp.start,
-            timeStamp.end,
-          ]
-        );
+          const videoResults = await pool.query(
+            "INSERT INTO videos (session_id, name, transcript, video_order, start_time, end_time) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+            [
+              sessionId,
+              trimVideo,
+              transcriptResult.alternatives[0].transcript,
+              index + 1,
+              timeStamp.start,
+              timeStamp.end,
+            ]
+          );
 
-        console.log(videoResults.rows);
+          console.log(videoResults.rows);
+        }
       })
     );
 
