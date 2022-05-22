@@ -63,7 +63,10 @@ const transcribeAudioAPI = async (audioName) => {
 
   // Get a Promise representation of the final result of the job
   const [response] = await operation.promise();
-  return response.results[0];
+
+  return response.results && response.results.length
+    ? response.results[0]
+    : undefined;
 };
 
 // ROUTE START HERE
@@ -142,7 +145,7 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
 
         const transcriptResult = await transcribeAudioAPI(trimAudio);
 
-        if (transcriptResult.alternatives) {
+        if (transcriptResult) {
           console.log(
             `Transcription: ${transcriptResult.alternatives[0].transcript}`
           );
