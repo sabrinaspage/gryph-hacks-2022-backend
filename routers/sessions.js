@@ -145,7 +145,7 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
         );
 
         await exec(
-          `ffmpeg -ss 0 -i ${trimVideoPath} -vframes 1 ${trimVideoThumbnailPath}`
+          `ffmpeg -ss ${start_trim} -i ${newVideoPath} -vframes 1 ${trimVideoThumbnailPath}`
         );
 
         await gcpStorage.bucket(bucketURL).upload(trimAudioPath, {
