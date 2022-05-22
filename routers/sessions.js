@@ -206,7 +206,7 @@ router.get("/videos/:session_id", (req, res) => {
 
   pool.query(
     "SELECT * FROM videos WHERE session_id = $1 ORDER BY video_order",
-    [session_id],
+    [session_id.toString()],
     (error, results) => {
       if (error) {
         throw error;
