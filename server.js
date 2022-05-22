@@ -6,7 +6,7 @@ const app = express();
 const bodyParse = require("body-parser");
 const users = require("./routers/users");
 const sessions = require("./routers/sessions");
-const fs = require("fs");
+
 //MiddleWare
 app.use(cors());
 app.use(bodyParse.urlencoded({ extended: true }));
@@ -16,6 +16,8 @@ app.use(morgan("dev"));
 //START  RUNNING MANUAL SQL
 
 /*
+const fs = require("fs");
+
 const Pool = require("pg").Pool;
 
 var queries = fs
