@@ -9,6 +9,34 @@ const { getVideoDurationInSeconds } = require("get-video-duration");
 const util = require("util");
 const exec = util.promisify(require("child_process").exec);
 
+const ffmpeg = require("fluent-ffmpeg");
+const pathToFfmpeg = require("ffmpeg-static");
+const ffprobe = require("ffprobe-static");
+
+const cutVideo = async (sourcePath, outputPath, startTime, duration) => {
+  await new Promise((resolve, reject) => {
+    ffmpeg(sourcePath)
+      .setFfmpegPath(pathToFfmpeg)
+      .setFfprobePath(ffprobe.path)
+      .output(outputPath)
+      .setStartTime(startTime)
+      .setDuration(duration)
+      .withVideoCodec("copy")
+      .withAudioCodec("copy")
+      .on("end", function (err) {
+        if (!err) {
+          console.log("conversion Done");
+          resolve();
+        }
+      })
+      .on("error", function (err) {
+        console.log("error: ", err);
+        reject(err);
+      })
+      .run();
+  });
+};
+
 //CockroachDB
 const Pool = require("pg").Pool;
 const pool = new Pool({
@@ -132,12 +160,15 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
         await exec(
           `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c:v copy -ac 1 ${trimAudioPath}`
         );
+
+        await cutVideo(newVideoPath, trimVideoPath, start_trim, end_trim);
+        /*
         await exec(
           `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c copy ${trimVideoPath}`
           //`ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -codec:v libx264 -crf 23 -pix_fmt yuv420p -codec:a aac -f mp4 -movflags faststart ${trimVideoPath}`
           //`ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c:v copy -c:a copy ${trimVideoPath}`
         );
-
+        */
         await gcpStorage.bucket(bucketURL).upload(trimAudioPath, {
           destination: trimAudio,
         });
