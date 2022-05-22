@@ -14,7 +14,6 @@ app.use(bodyParse.json());
 app.use(morgan("dev"));
 
 //START  RUNNING MANUAL SQL
-
 /*
 const Pool = require("pg").Pool;
 
@@ -39,6 +38,7 @@ const pool = new Pool({
   });
 })();
 */
+
 //END RUNNING MANUAL SQL
 
 app.use("/sessions", sessions);

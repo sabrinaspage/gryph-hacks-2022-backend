@@ -4,8 +4,11 @@ const { Storage } = require("@google-cloud/storage");
 const speech = require("@google-cloud/speech");
 const fs = require("fs");
 const fsExtra = require("fs-extra");
-const { exec } = require("child_process");
 const multer = require("multer");
+const { getVideoDurationInSeconds } = require("get-video-duration");
+const util = require("util");
+const exec = util.promisify(require("child_process").exec);
+
 //CockroachDB
 const Pool = require("pg").Pool;
 const pool = new Pool({
@@ -60,86 +63,151 @@ const transcribeAudioAPI = async (audioName) => {
 
   // Get a Promise representation of the final result of the job
   const [response] = await operation.promise();
-  response.results.forEach((result) => {
-    console.log(`Transcription: ${result.alternatives[0].transcript}`);
-    result.alternatives[0].words.forEach((wordInfo) => {
-      const startSecs =
-        `${wordInfo.startTime.seconds}` +
-        "." +
-        wordInfo.startTime.nanos / 100000000;
-      const endSecs =
-        `${wordInfo.endTime.seconds}` +
-        "." +
-        wordInfo.endTime.nanos / 100000000;
-      console.log(`Word: ${wordInfo.word}`);
-      console.log(`\t ${startSecs} secs - ${endSecs} secs`);
-    });
-  });
-
-  // Clear temp upload files
-  fsExtra.emptyDirSync("uploads");
+  return response.results[0];
 };
 
+const trimVideo = () => {
+  exec(`ffmpeg -i ${newVideoPath} -ac 1 ${outputAudioPath}`, async (error) => {
+    if (error) {
+      console.log(`error: ${error.message}`);
+      return;
+    }
+    return "Hello";
+  });
+};
 // ROUTE START HERE
 router.post("/upload-video", upload.single("my-video"), async (req, res) => {
-  const { user_id, session_name } = req.body;
-
+  const { sessionId } = req.query;
   const bucketURL = "gs://gryph-hack-2022-ee";
   try {
-    const results = await pool.query(
-      "INSERT INTO sessions (user_id , name) VALUES ($1, $2)",
-      [user_id, session_name]
-    );
-
-    console.log(results);
-    /*
     // Uploading video to GCP bucket
     const uploadedBuffer = await fs.promises.readFile(req.file.path);
 
     const timestamp = Date.now();
-    const newFileName = `${timestamp}-screen-record.mp4`;
-    const writePath = __dirname + `/../uploads/${newFileName}`;
+    const newVideoName = `${timestamp}-screen-record.mp4`;
+    const newVideoPath = __dirname + `/../uploads/${newVideoName}`;
 
-    await fs.promises.writeFile(writePath, uploadedBuffer, {});
+    await fs.promises.writeFile(newVideoPath, uploadedBuffer, {});
 
     const audioName = `${timestamp}-audio.wav`;
     const outputAudioPath = __dirname + `/../uploads/${audioName}`;
 
-    await gcpStorage.bucket(bucketURL).upload(writePath, {
-      destination: newFileName,
+    await exec(`ffmpeg -i ${newVideoPath} -ac 1 ${outputAudioPath}`);
+
+    // Upload full video
+    await gcpStorage.bucket(bucketURL).upload(newVideoPath, {
+      destination: newVideoName,
     });
 
-    exec(`ffmpeg -i ${writePath} -ac 1 ${outputAudioPath}`, async (error) => {
-      if (error) {
-        console.log(`error: ${error.message}`);
-        return;
-      } else {
-        await gcpStorage.bucket(bucketURL).upload(outputAudioPath, {
-          destination: audioName,
-        });
-        // Creates a speech client to transcribe timestamp
-        await transcribeAudioAPI(audioName);
-      }
+    // Upload full audio
+    await gcpStorage.bucket(bucketURL).upload(outputAudioPath, {
+      destination: audioName,
     });
-    */
+
+    const videoDuration = await getVideoDurationInSeconds(newVideoPath);
+
+    const videoResults = await pool.query(
+      "INSERT INTO videos (session_id, name, transcript, video_order, start_time, end_time) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+      [sessionId, newVideoName, audioName, 0, 0, videoDuration]
+    );
+
+    console.log(videoResults.rows);
+
+    const timestamps = [
+      { start: 0, end: 2 },
+      { start: 5, end: 8 },
+      { start: 10, end: 16 },
+    ];
+
+    await Promise.all(
+      timestamps.map(async (timeStamp, index) => {
+        const start_trim = new Date(timeStamp.start * 1000)
+          .toISOString()
+          .slice(11, 19);
+        const end_trim = new Date(timeStamp.end * 1000)
+          .toISOString()
+          .slice(11, 19);
+
+        // trim audio
+        const trimAudio = `${timestamp}-screen-record-${index + 1}.wav`;
+        const trimAudioPath = __dirname + `/../uploads/${trimAudio}`;
+        // trim videos
+        const trimVideo = `${timestamp}-screen-record-${index + 1}.mp4`;
+        const trimVideoPath = __dirname + `/../uploads/${trimVideo}`;
+
+        await exec(
+          `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c:v copy -ac 1 ${trimAudioPath}`
+        );
+        await exec(
+          `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c:v copy -ac 1 ${trimVideoPath}`
+        );
+
+        await gcpStorage.bucket(bucketURL).upload(trimAudioPath, {
+          destination: trimAudio,
+        });
+        await gcpStorage.bucket(bucketURL).upload(trimAudioPath, {
+          destination: trimVideo,
+        });
+
+        const transcriptResult = await transcribeAudioAPI(trimAudio);
+
+        console.log(
+          `Transcription: ${transcriptResult.alternatives[0].transcript}`
+        );
+
+        const videoResults = await pool.query(
+          "INSERT INTO videos (session_id, name, transcript, video_order, start_time, end_time) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
+          [
+            sessionId,
+            trimVideo,
+            transcriptResult.alternatives[0].transcript,
+            index + 1,
+            timeStamp.start,
+            timeStamp.end,
+          ]
+        );
+
+        console.log(videoResults.rows);
+      })
+    );
+
+    fsExtra.emptyDirSync("uploads");
   } catch (error) {
     console.log(error);
   }
 });
 
+router.get("/", (req, res) => {
+  pool.query("SELECT * FROM sessions", (error, results) => {
+    if (error) {
+      throw error;
+    }
+    res.status(200).send(results.rows);
+  });
+});
+
+router.get("/videos", (req, res) => {
+  pool.query("SELECT * FROM videos", (error, results) => {
+    if (error) {
+      throw error;
+    }
+    res.status(200).send(results.rows);
+  });
+});
+
 router.post("/", async (req, res) => {
   const { user_id, session_name } = req.body;
-  console.log(user_id);
   try {
     const results = await pool.query(
-      "INSERT INTO sessions (user_id , name) VALUES ($1, $2)",
+      "INSERT INTO sessions (user_id , name) VALUES ($1, $2) RETURNING *",
       [user_id, session_name]
     );
 
-    res.status(200).send(results);
+    res.status(200).send(results.rows[0]);
   } catch (error) {
     console.log(error);
     res.status(404).send(error);
   }
 });
+
 module.exports = router;

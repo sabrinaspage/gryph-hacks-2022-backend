@@ -6,7 +6,6 @@ CREATE TABLE users (
     type INTEGER NOT NULL
 );
 
-
 CREATE TABLE sessions (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
