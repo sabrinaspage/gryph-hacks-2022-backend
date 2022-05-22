@@ -41,7 +41,7 @@ router.post("/login", (req, res) => {
         throw error;
       }
       if (results.rows && results.rows.length > 0) {
-        res.status(200).send(results.rows);
+        res.status(200).send(results.rows[0]);
       } else {
         res.status(404).send({ error: "Invalid email or password" });
       }
