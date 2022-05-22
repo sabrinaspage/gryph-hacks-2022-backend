@@ -133,7 +133,7 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
           `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c:v copy -ac 1 ${trimAudioPath}`
         );
         await exec(
-          `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c:v copy ${trimVideoPath}`
+          `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c:v copy -c:a copy ${trimVideoPath}`
         );
 
         await gcpStorage.bucket(bucketURL).upload(trimAudioPath, {
