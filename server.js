@@ -14,11 +14,11 @@ app.use(bodyParse.json());
 app.use(morgan("dev"));
 
 //START  RUNNING MANUAL SQL
-/*
+
 const Pool = require("pg").Pool;
 
 var queries = fs
-  .readFileSync("./database/schema.sql")
+  .readFileSync("./database/manual.sql")
   .toString()
   .replace(/(\r\n|\n|\r)/gm, " ") // remove newlines
   .replace(/\s+/g, " ") // excess white space
@@ -37,7 +37,6 @@ const pool = new Pool({
     //console.log(res.rows[0].message); // Hello world!
   });
 })();
-*/
 
 //END RUNNING MANUAL SQL
 

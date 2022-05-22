@@ -66,15 +66,6 @@ const transcribeAudioAPI = async (audioName) => {
   return response.results[0];
 };
 
-const trimVideo = () => {
-  exec(`ffmpeg -i ${newVideoPath} -ac 1 ${outputAudioPath}`, async (error) => {
-    if (error) {
-      console.log(`error: ${error.message}`);
-      return;
-    }
-    return "Hello";
-  });
-};
 // ROUTE START HERE
 router.post("/upload-video", upload.single("my-video"), async (req, res) => {
   const { sessionId } = req.query;
@@ -184,6 +175,38 @@ router.get("/", (req, res) => {
     }
     res.status(200).send(results.rows);
   });
+});
+
+// GET SESSIONS FROM USER ID
+router.get("/:user_id", (req, res) => {
+  const user_id = req.params.user_id;
+
+  pool.query(
+    "SELECT * FROM sessions WHERE user_id = $1",
+    [user_id],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.status(200).send(results.rows);
+    }
+  );
+});
+
+// GET SESSIONS FROM SESSION ID
+router.get("/:session_id", (req, res) => {
+  const session_id = req.params.session_id;
+
+  pool.query(
+    "SELECT * FROM sessions WHERE id = $1",
+    [session_id],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.status(200).send(results.rows);
+    }
+  );
 });
 
 router.get("/videos", (req, res) => {
