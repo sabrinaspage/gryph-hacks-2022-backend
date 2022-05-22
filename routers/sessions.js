@@ -200,12 +200,12 @@ router.get("/:user_id", (req, res) => {
   );
 });
 
-// GET SESSIONS FROM SESSION ID
-router.get("/:session_id", (req, res) => {
+// GET VIDEOS FROM SESSION ID
+router.get("/videos/:session_id", (req, res) => {
   const session_id = req.params.session_id;
 
   pool.query(
-    "SELECT * FROM sessions WHERE id = $1",
+    "SELECT * FROM videos WHERE session_id = $1 ORDER BY video_order",
     [session_id],
     (error, results) => {
       if (error) {
@@ -214,15 +214,6 @@ router.get("/:session_id", (req, res) => {
       res.status(200).send(results.rows);
     }
   );
-});
-
-router.get("/videos", (req, res) => {
-  pool.query("SELECT * FROM videos", (error, results) => {
-    if (error) {
-      throw error;
-    }
-    res.status(200).send(results.rows);
-  });
 });
 
 router.post("/", async (req, res) => {
