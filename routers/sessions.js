@@ -158,7 +158,7 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
           destination: trimVideo,
         });
 
-        const transcriptResult = await transcribeAudioAPI(trimAudio);
+        const transcriptResult = await transcribeAudioAPI(trimAudioPath);
 
         // IF TRANSCRIPT SUCCESSFULLY
         if (transcriptResult) {
