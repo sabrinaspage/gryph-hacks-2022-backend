@@ -1,1 +1,1 @@
-DELETE FROM users;
+ALTER TABLE public.videos ADD video_order INT;
