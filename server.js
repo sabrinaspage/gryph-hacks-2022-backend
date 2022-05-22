@@ -15,6 +15,7 @@ app.use(morgan("dev"));
 
 //START  RUNNING MANUAL SQL
 
+/*
 const Pool = require("pg").Pool;
 
 var queries = fs
@@ -37,6 +38,7 @@ const pool = new Pool({
     //console.log(res.rows[0].message); // Hello world!
   });
 })();
+*/
 
 //END RUNNING MANUAL SQL
 
