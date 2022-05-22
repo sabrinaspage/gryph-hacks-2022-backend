@@ -31,7 +31,7 @@ const gcpStorage = new Storage({
   keyFilename: "./credentials/sunlit-theory-351023-08460d392cea.json",
 });
 
-const transcribeAudioAPI = async (audioName) => {
+const transcribeAudioAPI = async (audioPath) => {
   const bucketURL = "gs://gryph-hack-2022-ee";
 
   const client = new speech.SpeechClient({
@@ -49,7 +49,7 @@ const transcribeAudioAPI = async (audioName) => {
   };
 
   const audio = {
-    uri: bucketURL + "/" + audioName,
+    uri: audioPath,
   };
 
   const request = {
