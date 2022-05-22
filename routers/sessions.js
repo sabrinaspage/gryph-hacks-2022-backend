@@ -147,6 +147,7 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
 
         const transcriptResult = await transcribeAudioAPI(trimAudio);
 
+        // IF TRANSCRIPT SUCCESSFULLY
         if (transcriptResult) {
           console.log(
             `Transcription: ${transcriptResult.alternatives[0].transcript}`
@@ -165,6 +166,9 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
           );
 
           console.log(videoResults.rows);
+        } else {
+          await storage.bucket(bucketURL).file(trimAudio).delete();
+          await storage.bucket(bucketURL).file(trimVideo).delete();
         }
       })
     );
