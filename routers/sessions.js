@@ -188,13 +188,28 @@ router.get("/", (req, res) => {
   });
 });
 
+router.get("/data/:session_id", (req, res) => {
+  const session_id = req.params.session_id || "";
+
+  pool.query(
+    "SELECT * FROM sessions WHERE id = $1",
+    [session_id.toString()],
+    (error, results) => {
+      if (error) {
+        throw error;
+      }
+      res.status(200).send(results.rows);
+    }
+  );
+});
+
 // GET SESSIONS FROM USER ID
 router.get("/:user_id", (req, res) => {
-  const user_id = req.params.user_id;
+  const user_id = req.params.user_id || "";
 
   pool.query(
     "SELECT * FROM sessions WHERE user_id = $1",
-    [user_id],
+    [user_id.toString()],
     (error, results) => {
       if (error) {
         throw error;
@@ -206,7 +221,7 @@ router.get("/:user_id", (req, res) => {
 
 // GET VIDEOS FROM SESSION ID
 router.get("/videos/:session_id", (req, res) => {
-  const session_id = req.params.session_id;
+  const session_id = req.params.session_id || "";
 
   pool.query(
     "SELECT * FROM videos WHERE session_id = $1 ORDER BY video_order",
@@ -220,6 +235,7 @@ router.get("/videos/:session_id", (req, res) => {
   );
 });
 
+// CREATE SESSION
 router.post("/", async (req, res) => {
   const { user_id, session_name } = req.body;
   try {
@@ -227,6 +243,21 @@ router.post("/", async (req, res) => {
       "INSERT INTO sessions (user_id , name) VALUES ($1, $2) RETURNING *",
       [user_id, session_name]
     );
+
+    res.status(200).send(results.rows[0]);
+  } catch (error) {
+    console.log(error);
+    res.status(404).send(error);
+  }
+});
+
+// DELETE SESSION
+router.post("/delete", async (req, res) => {
+  const { session_id } = req.body;
+  try {
+    const results = await pool.query("DELETE FROM sessions WHERE id = $1", [
+      (session_id || "").toString(),
+    ]);
 
     res.status(200).send(results.rows[0]);
   } catch (error) {
