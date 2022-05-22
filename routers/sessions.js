@@ -136,14 +136,17 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
         const trimVideoThumbnailPath =
           __dirname + `/../uploads/${trimVideoThumbnail}`;
 
+        // GENERATE TRIM AUDIO
         await exec(
           `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c:v copy -ac 1 ${trimAudioPath}`
         );
 
+        // GENERATE TRIM VIDEO
         await exec(
           `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c copy ${trimVideoPath}`
         );
 
+        // GENERATE THUMBNAIL
         await exec(
           `ffmpeg -ss ${start_trim} -i ${newVideoPath} -vframes 1 ${trimVideoThumbnailPath}`
         );
@@ -172,7 +175,7 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
             "INSERT INTO videos (session_id, name, transcript, video_order, start_time, end_time) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *",
             [
               sessionId,
-              trimVideo,
+              trimVideoThumbnail,
               transcriptResult.alternatives[0].transcript,
               index + 1,
               timeStamp.start,
