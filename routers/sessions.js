@@ -133,7 +133,8 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
           `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c:v copy -ac 1 ${trimAudioPath}`
         );
         await exec(
-          `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -codec:v libx264 -crf 23 -pix_fmt yuv420p -codec:a aac -f mp4 -movflags faststart ${trimVideoPath}`
+          `ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c copy ${trimVideoPath}`
+          //`ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -codec:v libx264 -crf 23 -pix_fmt yuv420p -codec:a aac -f mp4 -movflags faststart ${trimVideoPath}`
           //`ffmpeg -i ${newVideoPath} -ss ${start_trim} -to ${end_trim} -c:v copy -c:a copy ${trimVideoPath}`
         );
 
