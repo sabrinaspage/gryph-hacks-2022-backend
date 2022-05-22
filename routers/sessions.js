@@ -129,6 +129,7 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
 
 router.post("/", async (req, res) => {
   const { user_id, session_name } = req.body;
+  console.log(user_id);
   try {
     const results = await pool.query(
       "INSERT INTO sessions (user_id , name) VALUES ($1, $2)",
