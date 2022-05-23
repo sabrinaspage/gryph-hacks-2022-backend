@@ -192,6 +192,7 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
     );
 
     fsExtra.emptyDirSync("uploads");
+    res.status(200).send({ res: "Done transcription" });
   } catch (error) {
     console.log(error);
   }
