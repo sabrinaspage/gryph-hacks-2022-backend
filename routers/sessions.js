@@ -270,7 +270,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// DELETE SESSIONs
+// DELETE SESSION
 router.post("/delete", async (req, res) => {
   const { session_id } = req.body;
   try {
