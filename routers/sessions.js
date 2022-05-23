@@ -31,7 +31,7 @@ const gcpStorage = new Storage({
   keyFilename: "./credentials/sunlit-theory-351023-08460d392cea.json",
 });
 
-const transcribeAudioAPI = async (audioPath) => {
+const transcribeAudioAPI = async (audioName) => {
   const bucketURL = "gs://gryph-hack-2022-ee";
 
   const client = new speech.SpeechClient({
@@ -49,7 +49,7 @@ const transcribeAudioAPI = async (audioPath) => {
   };
 
   const audio = {
-    uri: audioPath,
+    uri: bucketURL + "/" + audioName,
   };
 
   const request = {
@@ -158,7 +158,7 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
           destination: trimVideo,
         });
 
-        const transcriptResult = await transcribeAudioAPI(trimAudioPath);
+        const transcriptResult = await transcribeAudioAPI(trimAudio);
 
         // IF TRANSCRIPT SUCCESSFULLY
         if (transcriptResult) {
@@ -273,7 +273,7 @@ router.post("/", async (req, res) => {
 router.post("/delete", async (req, res) => {
   const { session_id } = req.body;
   try {
-    await pool.query("DELETE FROM videos WHERE session_id = $1", [
+    await pool.query("DELETE FROM videos WHERE section_id = $1", [
       (session_id || "").toString(),
     ]);
 
