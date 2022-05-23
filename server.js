@@ -16,6 +16,7 @@ app.use("/sessions", sessions);
 app.use(cors());
 app.use("/users", users);
 
+// HELLo
 app.use(cors());
 app.get("/", (req, res) => {
   res.status(200).send({ msg: "Hello" });
