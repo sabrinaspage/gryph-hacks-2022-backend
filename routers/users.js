@@ -36,7 +36,7 @@ router.post("/login", (req, res) => {
   const { email, password } = req.body;
   pool.query(
     "SELECT * FROM users WHERE email = $1 AND password = $2",
-    [email, password],
+    [email || "", password || ""],
     (error, results) => {
       if (error) {
         throw error;
@@ -68,7 +68,7 @@ router.post("/", (req, res) => {
       } else {
         pool.query(
           "INSERT INTO users (name, email, password, type) VALUES ($1, $2, $3, $4)",
-          [name, email, password, type],
+          [name || "", email || "", password || "", type || ""],
           (error, results) => {
             if (error) {
               throw error;
