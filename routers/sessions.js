@@ -273,6 +273,10 @@ router.post("/", async (req, res) => {
 router.post("/delete", async (req, res) => {
   const { session_id } = req.body;
   try {
+    await pool.query("DELETE FROM videos WHERE session_id = $1", [
+      (session_id || "").toString(),
+    ]);
+
     const results = await pool.query("DELETE FROM sessions WHERE id = $1", [
       (session_id || "").toString(),
     ]);
