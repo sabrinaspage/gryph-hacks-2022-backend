@@ -31,8 +31,8 @@ const gcpStorage = new Storage({
   keyFilename: "./credentials/sunlit-theory-351023-08460d392cea.json",
 });
 
-const transcribeAudioAPI = async (audioName) => {
-  const bucketURL = "gs://gryph-hack-2022-ee";
+const transcribeAudioAPI = async (audioPath) => {
+  //const bucketURL = "gs://gryph-hack-2022-ee";
 
   const client = new speech.SpeechClient({
     projectId: "sunlit-theory-351023",
@@ -49,7 +49,7 @@ const transcribeAudioAPI = async (audioName) => {
   };
 
   const audio = {
-    uri: bucketURL + "/" + audioName,
+    uri: audioPath,
   };
 
   const request = {
@@ -74,11 +74,8 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
   const { sessionId } = req.query;
   const bucketURL = "gs://gryph-hack-2022-ee";
   try {
-    console.log(req.file.path);
     // Uploading video to GCP bucket
-    const uploadedBuffer = await fs.promises.readFile(
-      __dirname + `/../${req.file.path}`
-    );
+    const uploadedBuffer = await fs.promises.readFile(req.file.path);
 
     const timestamp = Date.now();
     const newVideoName = `${timestamp}-screen-record.mp4`;
@@ -161,7 +158,7 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
           destination: trimVideo,
         });
 
-        const transcriptResult = await transcribeAudioAPI(trimAudio);
+        const transcriptResult = await transcribeAudioAPI(trimAudioPath);
 
         // IF TRANSCRIPT SUCCESSFULLY
         if (transcriptResult) {
