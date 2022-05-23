@@ -21,6 +21,8 @@ app.use((req, res, next) => {
   next();
 });
 
+app.options("*", cors());
+
 app.use(
   cors({
     origin: "https://cheery-choux-da9d8f.netlify.app/",
