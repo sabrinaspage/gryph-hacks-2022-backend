@@ -8,6 +8,19 @@ const users = require("./routers/users");
 const sessions = require("./routers/sessions");
 
 //MiddleWare
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"),
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+  if (req.method === "OPTIONS") {
+    res.header("Access-Control-Allow-Methods", "PUT, POST, DELETE, PATCH, GET");
+    return res.status(200).json({});
+  }
+  next();
+});
+
 app.use(bodyParse.urlencoded({ extended: true }));
 app.use(bodyParse.json());
 app.use(morgan("dev"));
