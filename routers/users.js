@@ -69,7 +69,7 @@ router.post("/", (req, res) => {
       } else {
         pool.query(
           "INSERT INTO users (name, email, password, type) VALUES ($1, $2, $3, $4)",
-          [name || "", email || "", password || "", type || ""],
+          [name || "", email || "", password || "", type],
           (error, results) => {
             if (error) {
               throw error;
