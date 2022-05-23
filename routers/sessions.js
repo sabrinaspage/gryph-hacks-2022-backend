@@ -74,6 +74,7 @@ router.post("/upload-video", upload.single("my-video"), async (req, res) => {
   const { sessionId } = req.query;
   const bucketURL = "gs://gryph-hack-2022-ee";
   try {
+    console.log(req.file.path);
     // Uploading video to GCP bucket
     const uploadedBuffer = await fs.promises.readFile(
       __dirname + `/../${req.file.path}`
