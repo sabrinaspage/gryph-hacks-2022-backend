@@ -70,13 +70,13 @@ router.post("/", (req, res) => {
         });
       } else {
         pool.query(
-          "INSERT INTO users (name, email, password, type) VALUES ($1, $2, $3, $4)",
+          "INSERT INTO users (name, email, password, type) VALUES ($1, $2, $3, $4) RETURNING *",
           [name || "", email || "", password || "", type],
           (error, results) => {
             if (error) {
               throw error;
             }
-            res.status(201).send(results);
+            res.status(201).send(results.rows[0]);
           }
         );
       }
