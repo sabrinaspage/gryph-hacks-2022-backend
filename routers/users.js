@@ -34,6 +34,8 @@ router.get("/:id", (req, res) => {
 //s
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
+
+  console.log(req.body);
   pool.query(
     "SELECT * FROM users WHERE email = $1 AND password = $2",
     [email || "", password || ""],
@@ -52,7 +54,7 @@ router.post("/login", (req, res) => {
 
 router.post("/", (req, res) => {
   const { name, email, password, type } = req.body;
-
+  // UPDATE
   console.log(req.body);
   pool.query(
     "SELECT * FROM users WHERE email = $1",
