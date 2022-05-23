@@ -53,6 +53,7 @@ router.post("/login", (req, res) => {
 router.post("/", (req, res) => {
   const { name, email, password, type } = req.body;
 
+  console.log(req.body);
   pool.query(
     "SELECT * FROM users WHERE email = $1",
     [email || ""],
