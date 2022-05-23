@@ -55,7 +55,7 @@ router.post("/", (req, res) => {
 
   pool.query(
     "SELECT * FROM users WHERE email = $1",
-    [email],
+    [email || ""],
     (error, results) => {
       if (error) {
         throw error;
