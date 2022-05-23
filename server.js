@@ -21,16 +21,21 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(
+  cors({
+    origin: "https://cheery-choux-da9d8f.netlify.app/",
+    credentials: true,
+  })
+);
+
 app.use(bodyParse.urlencoded({ extended: true }));
 app.use(bodyParse.json());
 app.use(morgan("dev"));
-app.use(cors());
+
 app.use("/sessions", sessions);
-app.use(cors());
 app.use("/users", users);
 
 // HELLo
-app.use(cors());
 app.get("/", (req, res) => {
   res.status(200).send({ msg: "Hello" });
 });
