@@ -8,13 +8,15 @@ const users = require("./routers/users");
 const sessions = require("./routers/sessions");
 
 //MiddleWare
-app.use(cors());
 app.use(bodyParse.urlencoded({ extended: true }));
 app.use(bodyParse.json());
 app.use(morgan("dev"));
+app.use(cors());
 app.use("/sessions", sessions);
+app.use(cors());
 app.use("/users", users);
 
+app.use(cors());
 app.get("/", (req, res) => {
   res.status(200).send({ msg: "Hello" });
 });
