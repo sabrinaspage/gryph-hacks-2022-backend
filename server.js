@@ -21,14 +21,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.options("*", cors());
-
-app.use(
-  cors({
-    origin: "https://cheery-choux-da9d8f.netlify.app/",
-    credentials: true,
-  })
-);
+app.use(cors());
 
 app.use(bodyParse.urlencoded({ extended: true }));
 app.use(bodyParse.json());
