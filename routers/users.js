@@ -31,6 +31,7 @@ router.get("/:id", (req, res) => {
   );
 });
 
+//s
 router.post("/login", (req, res) => {
   const { email, password } = req.body;
   pool.query(
