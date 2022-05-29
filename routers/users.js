@@ -17,6 +17,7 @@ router.get("/", (req, res) => {
   });
 });
 
+// GET USER BY ID
 router.get("/:id", (req, res) => {
   pool.query(
     "SELECT * FROM users WHERE id = $1",
@@ -25,20 +26,17 @@ router.get("/:id", (req, res) => {
       if (error) {
         throw error;
       }
-      console.log(results);
       res.status(200).send(results.rows);
     }
   );
 });
 
-//s
+// LOGIN USER
 router.post("/login", (req, res) => {
-  const { email, password } = req.body;
-
-  console.log(req.body);
+  const { username, password } = req.body;
   pool.query(
-    "SELECT * FROM users WHERE email = $1 AND password = $2",
-    [email || "", password || ""],
+    "SELECT * FROM users WHERE username = $1 AND password = $2",
+    [username, password],
     (error, results) => {
       if (error) {
         throw error;
@@ -46,19 +44,19 @@ router.post("/login", (req, res) => {
       if (results.rows && results.rows.length > 0) {
         res.status(200).send(results.rows[0]);
       } else {
-        res.status(404).send({ error: "Invalid email or password" });
+        res.status(404).send({ error: "Invalid username or password" });
       }
     }
   );
 });
 
-router.post("/", (req, res) => {
-  const { name, email, password, type } = req.body;
+// REGISTER
+router.post("/register", (req, res) => {
+  const { username, password } = req.body;
   // UPDATE
-  console.log(req.body);
   pool.query(
-    "SELECT * FROM users WHERE email = $1",
-    [email || ""],
+    "SELECT * FROM users WHERE username = $1",
+    [username],
     (error, results) => {
       if (error) {
         throw error;
@@ -66,35 +64,22 @@ router.post("/", (req, res) => {
 
       if (results.rows && results.rows.length > 0) {
         res.status(404).send({
-          error: "Email already exists",
+          error: "Username already exists",
         });
       } else {
         pool.query(
-          "INSERT INTO users (name, email, password, type) VALUES ($1, $2, $3, $4) RETURNING *",
-          [name || "", email || "", password || "", type],
+          "INSERT INTO users (username, password) VALUES ($1, $2) RETURNING *",
+          [username, password],
           (error, results) => {
             if (error) {
               throw error;
             }
-            res.status(201).send(results.rows[0]);
+            res.status(200).send(results.rows[0]);
           }
         );
       }
     }
   );
-
-  /*
-  pool.query(
-    "INSERT INTO users (name, email, password, type) VALUES ($1, $2, $3, $4)",
-    [name, email, password, type],
-    (error, results) => {
-      if (error) {
-        throw error;
-      }
-      res.status(201).send(results);
-    }
-  );
-  */
 });
 
 router.get("/delete/:id", (req, res) => {
