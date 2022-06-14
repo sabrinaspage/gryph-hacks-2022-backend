@@ -35,6 +35,17 @@ router.get("/:id", (req, res) => {
 // LOGIN USER
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
+  if (_.isEmpty(username)) {
+    return res.status(404).send({
+      username: "Please enter a username",
+    });
+  }
+  if (_.isEmpty(password)) {
+    return res.status(404).send({
+      password: "Please enter a password",
+    });
+  }
+
   pool.query(
     "SELECT * FROM users WHERE username = $1 AND password = $2",
     [username, password],
@@ -43,9 +54,14 @@ router.post("/login", (req, res) => {
         throw error;
       }
       if (results.rows && results.rows.length > 0) {
-        res.status(200).send(results.rows[0]);
+        return res.status(200).send(results.rows[0]);
       } else {
-        res.status(404).send({ error: "Invalid username or password" });
+        return res
+          .status(404)
+          .send({
+            username: "Invalid username or password",
+            password: "Invalid username or password",
+          });
       }
     }
   );
