@@ -20,9 +20,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// TEST
+//TEST
 app.use(cors());
-
 app.use(bodyParse.urlencoded({ extended: true }));
 app.use(bodyParse.json());
 app.use(morgan("dev"));

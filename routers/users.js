@@ -1,4 +1,5 @@
 const express = require("express");
+const _ = require("lodash");
 const router = express.Router();
 
 //CockroachDB
@@ -53,6 +54,16 @@ router.post("/login", (req, res) => {
 // REGISTER
 router.post("/register", (req, res) => {
   const { username, password } = req.body;
+  if (_.isEmpty(username)) {
+    return res.status(404).send({
+      username: "Please enter a username",
+    });
+  }
+  if (_.isEmpty(password)) {
+    return res.status(404).send({
+      password: "Please enter a password",
+    });
+  }
   // UPDATE
   pool.query(
     "SELECT * FROM users WHERE username = $1",
@@ -63,8 +74,8 @@ router.post("/register", (req, res) => {
       }
 
       if (results.rows && results.rows.length > 0) {
-        res.status(404).send({
-          error: "Username already exists",
+        return res.status(404).send({
+          username: "Username already exists",
         });
       } else {
         pool.query(
@@ -74,7 +85,7 @@ router.post("/register", (req, res) => {
             if (error) {
               throw error;
             }
-            res.status(200).send(results.rows[0]);
+            return res.status(200).send(results.rows[0]);
           }
         );
       }
